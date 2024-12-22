@@ -6,23 +6,15 @@ const standardTheme = document.querySelector('.standard-theme');
 const lightTheme = document.querySelector('.light-theme');
 const darkerTheme = document.querySelector('.darker-theme');
 
-
 // Event Listeners
-
 toDoBtn.addEventListener('click', addToDo);
-toDoList.addEventListener('click', deletecheck);
-document.addEventListener("DOMContentLoaded", getTodos);
+toDoList.addEventListener('click', handleTaskAction);
+document.addEventListener("DOMContentLoaded", fetchTasks);
 standardTheme.addEventListener('click', () => changeTheme('standard'));
 lightTheme.addEventListener('click', () => changeTheme('light'));
 darkerTheme.addEventListener('click', () => changeTheme('darker'));
 
-// Check if one theme has been set previously and apply it (or std theme if not found):
-let savedTheme = localStorage.getItem('savedTheme');
-savedTheme === null ?
-    changeTheme('standard')
-    : changeTheme(localStorage.getItem('savedTheme'));
-
-// Functions;
+// Functions
 function addToDo(event) {
     // Prevents form from submitting / Prevents form from relaoding;
     event.preventDefault();
@@ -198,5 +190,113 @@ function changeTheme(color) {
                 button.className = `todo-btn ${color}-button`;
             }
         });
+    });
+}
+
+// Fetch tasks from API
+async function fetchTasks() {
+    const response = await fetch('/api/tasks'
+);
+    const tasks = await response.json();
+    renderTasks(tasks);
+}
+
+// Add a task
+async function addToDo(event) {
+    event.preventDefault();
+
+    const taskTitle = toDoInput.value.trim();
+    if (!taskTitle) {
+        alert('You must write something!');
+        return; // Ensure no further execution if input is empty
+    }
+
+    try {
+        const response = await fetch('/api/tasks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: taskTitle })
+        });
+
+        if (!response.ok) throw new Error('Failed to create task');
+
+        const newTask = await response.json();
+        renderTask(newTask); // Add the new task to the DOM
+        toDoInput.value = ''; // Clear the input field
+    } catch (error) {
+        console.error('Error adding task:', error);
+    }
+}
+
+
+// Handle task actions (delete or complete)
+async function handleTaskAction(event) {
+    const item = event.target;
+    const taskId = item.parentElement.getAttribute('data-id');
+
+    if (item.classList.contains('delete-btn')) {
+        try {
+            const response = await fetch(`/api/tasks/${taskId}`, { method: 'DELETE' });
+            if (!response.ok) throw new Error('Failed to delete task');
+            // Re-fetch tasks to update the UI
+            fetchTasks();
+        } catch (error) {
+            console.error('Error deleting task:', error);
+        }
+    } else if (item.classList.contains('check-btn')) {
+        const task = item.parentElement;
+        const isCompleted = !task.classList.contains('completed');
+        try {
+            const response = await fetch(`/api/tasks/${taskId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ completed: isCompleted })
+            });
+            if (!response.ok) throw new Error('Failed to update task');
+            task.classList.toggle('completed');
+        } catch (error) {
+            console.error('Error updating task:', error);
+        }
+    }
+}
+
+
+// Render tasks list
+function renderTasks(tasks) {
+    toDoList.innerHTML = '';
+    tasks.forEach(renderTask);
+}
+
+// Render a single task
+function renderTask(task) {
+    const toDoDiv = document.createElement('div');
+    toDoDiv.classList.add('todo');
+    if (task.completed) toDoDiv.classList.add('completed');
+    toDoDiv.setAttribute('data-id', task.id);
+
+    const newToDo = document.createElement('li');
+    newToDo.textContent = task.title;
+    newToDo.classList.add('todo-item');
+    toDoDiv.appendChild(newToDo);
+
+    const checked = document.createElement('button');
+    checked.innerHTML = '<i class="fas fa-check"></i>';
+    checked.classList.add('check-btn');
+    toDoDiv.appendChild(checked);
+
+    const deleted = document.createElement('button');
+    deleted.innerHTML = '<i class="fas fa-trash"></i>';
+    deleted.classList.add('delete-btn');
+    toDoDiv.appendChild(deleted);
+
+    toDoList.appendChild(toDoDiv);
+}
+
+// Change theme function
+function changeTheme(color) {
+    localStorage.setItem('savedTheme', color);
+    document.body.className = color;
+    document.querySelectorAll('.todo').forEach(todo => {
+        todo.className = `todo ${color}-todo`;
     });
 }

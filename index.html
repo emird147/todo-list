@@ -47,4 +47,25 @@
     </div>
     <script src="JS/main.js" type="text/javascript"> </script>
 </body>
+
+<script>
+    // Fetch tasks from the API
+    async function fetchTasks() {
+      const response = await fetch('/api/tasks'
+);
+      const tasks = await response.json();
+      const taskList = document.querySelector('.todo-list');
+      taskList.innerHTML = ''; // Clear existing tasks
+  
+      tasks.forEach(task => {
+        const taskItem = document.createElement('li');
+        taskItem.textContent = task.title;
+        taskItem.className = task.completed ? 'completed' : '';
+        taskList.appendChild(taskItem);
+      });
+    }
+  
+    document.addEventListener('DOMContentLoaded', fetchTasks);
+  </script>
+  
 </html>
