@@ -334,6 +334,13 @@ a:hover {
     color: #ffffff;
 }
 
+.todo-item:focus {
+    outline: none;
+    border: 1px solid #ffdfdb;
+    padding: 0.2rem;
+    border-radius: 5px;
+}
+
 
 /* Responsive design */
 @media only screen and (max-width: 1000px) {

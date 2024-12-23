@@ -42,7 +42,6 @@ function renderTasks(tasks) {
 
 function renderTask(task) {
     console.log("Rendering task:", task); // Debugging: Task to render
-    // Existing task rendering logic...
 }
 
 
@@ -60,10 +59,12 @@ function renderTask(task) {
     if (task.completed) toDoDiv.classList.add('completed');
     toDoDiv.setAttribute('data-id', task.id || task._id);
 
-    // Task title
+    // Task title (editable)
     const newToDo = document.createElement('li');
     newToDo.textContent = task.title || 'Untitled Task';
     newToDo.classList.add('todo-item');
+    newToDo.contentEditable = true; // Make it editable
+    newToDo.addEventListener('blur', handleEditTask); // Save changes on blur
     toDoDiv.appendChild(newToDo);
 
     // "Complete" button
@@ -80,9 +81,36 @@ function renderTask(task) {
 
     // Append the task div to the list
     toDoList.appendChild(toDoDiv);
-
-    console.log("Rendered task:", task); // Debugging: Check if each task is rendered
 }
+
+async function handleEditTask(event) {
+    const taskElement = event.target;
+    const newTitle = taskElement.textContent.trim();
+    const taskId = taskElement.parentElement.getAttribute('data-id');
+
+    if (!newTitle) {
+        alert('Task title cannot be empty.');
+        taskElement.textContent = 'Untitled Task';
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/tasks/${taskId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: newTitle })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update task');
+        }
+
+        console.log(`Task with ID ${taskId} updated to: ${newTitle}`);
+    } catch (error) {
+        console.error('Error updating task:', error);
+    }
+}
+
 
 
 // Add a new task and send it to the API
