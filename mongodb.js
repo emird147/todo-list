@@ -1,6 +1,6 @@
 import { MongoClient } from 'mongodb';
 
-const uri = process.env.MONGODB_URI;
+const uri = "mongodb+srv://emirdincer:123@todo-list.kz09j.mongodb.net/?retryWrites=true&w=majority&appName=todo-list";
 const options = {};
 
 if (!uri) {

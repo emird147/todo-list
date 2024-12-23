@@ -44,7 +44,7 @@ body {
     align-items: center;
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
+    justify-content: center;
     font-size: 3rem;
     min-height: 25vh;
     width: 100%;
@@ -95,8 +95,8 @@ body {
     white-space: pre;
     overflow: hidden;     
     letter-spacing: 0.20rem;
-    margin-top: 50px;
-    margin-bottom: 20px;
+    margin-top: 20px;
+    margin-bottom: 10px;
     max-width: 480px;
   }
   
@@ -322,6 +322,18 @@ form button {
     transform: translateY(45rem) rotateZ(45deg);
     opacity: 0;
 }
+
+a {
+    text-decoration: none;
+    color: #ffdfdb;
+    font-size: 1rem;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: #ffffff;
+}
+
 
 /* Responsive design */
 @media only screen and (max-width: 1000px) {
